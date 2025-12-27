@@ -161,3 +161,26 @@ int IncidentManager::totalIncidents() {
     }
     return count;
 }
+// ===== ADD ONLY =====
+void IncidentManager::loadFromCSV(string filename) {
+    ifstream file(filename);
+    string line;
+
+    getline(file, line); // header skip
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string id, t, l, d, s;
+
+        getline(ss, id, ',');
+        getline(ss, t, ',');
+        getline(ss, l, ',');
+        getline(ss, d, ',');
+        getline(ss, s, ',');
+
+        addIncident(t, l, d, stoi(s));
+    }
+    file.close();
+}
+
+
