@@ -1,38 +1,37 @@
 #include "Incident.h"
 
-
-Incident::Incident() {
-    incidentID = 0;
-    incidentType = "";
-    location = "";
-    description = "";
-    dateTime = "";
-    severityLevel = 0;
-    status = "pending";
-
-            // Citizen information
-
-    citizenName = "";
-    citizenContact = "";
-}
-
-Incident::Incident(int id, string type, string loc, string desc,
-    string datetime, int severity, string stat,
-    string cName, string cContact)
+// Default constructor
+Incident::Incident()
+    : incidentID(0),
+      incidentType(""),
+      location(""),
+      description(""),
+      dateTime(""),
+      severityLevel(0),
+      status("pending"),
+      citizenName(""),
+      citizenContact("")
 {
-    incidentID = id;
-    incidentType = type;
-    location = loc;
-    description = desc;
-    dateTime = datetime;
-    severityLevel = severity;
-    status = stat;
-
-    citizenName = cName;
-    citizenContact = cContact;
 }
 
+// Parameterized constructor
+Incident::Incident(int incId, string incType, string incLocation,
+                   string incDescription, string incDateTime,
+                   int level, string incStatus,
+                   string name, string contact)
+    : incidentID(incId),
+      incidentType(incType),
+      location(incLocation),
+      description(incDescription),
+      dateTime(incDateTime),
+      severityLevel(level),
+      status(incStatus),
+      citizenName(name),
+      citizenContact(contact)
+{
+}
 
+// Getters
 int Incident::getID() const {
     return incidentID;
 }
@@ -65,10 +64,11 @@ string Incident::getCitizenContact() const {
     return citizenContact;
 }
 
-void Incident::setStatus(string newStatus) {
-    status = newStatus;
+// Setters
+void Incident::setStatus(string updatedStatus) {
+    status = updatedStatus;
 }
 
-void Incident::setSeverity(int sev) {
-    severityLevel = sev;
+void Incident::setSeverity(int newSeverity) {
+    severityLevel = newSeverity;
 }
