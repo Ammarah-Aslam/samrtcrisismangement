@@ -3,7 +3,6 @@
 AuthorityIncidentManager::AuthorityIncidentManager() {
     head = nullptr;
 }
-
 void AuthorityIncidentManager::addIncident(string t, string l, string d, int s) {
 
     AuthorityIncident* newNode = new AuthorityIncident(t, l, d, s);
@@ -19,7 +18,6 @@ void AuthorityIncidentManager::addIncident(string t, string l, string d, int s) 
         temp->next = newNode;
     }
 }
-
 void AuthorityIncidentManager::displayIncidents() {
 
     AuthorityIncident* temp = head;
@@ -33,7 +31,6 @@ void AuthorityIncidentManager::displayIncidents() {
         temp = temp->next;
     }
 }
-
 int AuthorityIncidentManager::totalIncidents() {
 
     int count = 0;
