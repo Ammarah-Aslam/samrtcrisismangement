@@ -51,10 +51,8 @@ int main() {
             const char* reply = "Incident received & stored";
             send(clientSocket, reply, strlen(reply), 0);
         }
-
         closesocket(clientSocket);
     }
-
     WSACleanup();
     return 0;
 }
