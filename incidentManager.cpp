@@ -1,186 +1,84 @@
-#include "IncidentManager.h"
-#include <iostream>
-using namespace std;
+#include "Graph.h"
 
-// ----------- Constructor -----------
-
-IncidentManager::IncidentManager() {
-    head = nullptr;
-    root = nullptr;
+Graph::Graph(int vertices) {
+    V = vertices;
+    adj.resize(V);
 }
 
-// ----------- Linked List Operations -----------
-
-void IncidentManager::addIncident(string t, string l, string d, int s) {
-    IncidentNode* newNode = new IncidentNode(t, l, d, s);
-    newNode->next = head;
-    head = newNode;
+void Graph::addEdge(int u, int v, int weight) {
+    adj[u].push_back({ v, weight });
+    adj[v].push_back({ u, weight });
 }
 
-void IncidentManager::deleteIncident(string t) {
-    IncidentNode* temp = head;
-    IncidentNode* prev = nullptr;
+// ---------------- BFS ----------------
+void Graph::BFS(int start) {
+    vector<bool> visited(V, false);
+    queue<int> q;
 
-    while (temp != nullptr) {
-        if (temp->type == t) {
-            if (prev == nullptr) head = temp->next;
-            else prev->next = temp->next;
-            delete temp;
-            return;
+    visited[start] = true;
+    q.push(start);
+
+    cout << "BFS Traversal: ";
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+        cout << node << " ";
+
+        for (auto nbr : adj[node]) {
+            if (!visited[nbr.first]) {
+                visited[nbr.first] = true;
+                q.push(nbr.first);
+            }
         }
-        prev = temp;
-        temp = temp->next;
     }
+    cout << endl;
 }
 
-void IncidentManager::displayLL() {
-    IncidentNode* temp = head;
-    while (temp != nullptr) {
-        cout << "Type: " << temp->type << ", Location: " << temp->location
-            << ", Severity: " << temp->severity << endl;
-        temp = temp->next;
-    }
+// ---------------- DFS ----------------
+void Graph::DFS(int start) {
+    vector<bool> visited(V, false);
+    cout << "DFS Traversal: ";
+    DFSUtil(start, visited);
+    cout << endl;
 }
 
-// ----------- Stack Operations -----------
+void Graph::DFSUtil(int v, vector<bool>& visited) {
+    visited[v] = true;
+    cout << v << " ";
 
-void IncidentManager::pushHistory(IncidentNode* node) {
-    stackHistory.push_back(node);
-}
-
-IncidentNode* IncidentManager::popHistory() {
-    if (stackHistory.empty()) return nullptr;
-    IncidentNode* node = stackHistory.back();
-    stackHistory.pop_back();
-    return node;
-}
-
-// ----------- Queue Operations -----------
-
-void IncidentManager::enqueueIncident(IncidentNode* node) {
-    queueList.push_back(node);
-}
-
-IncidentNode* IncidentManager::dequeueIncident() {
-    if (queueList.empty()) return nullptr;
-    IncidentNode* node = queueList.front();
-    queueList.erase(queueList.begin());
-    return node;
-}
-
-// ----------- Priority Queue (Min-Heap) -----------
-
-void IncidentManager::insertPQ(IncidentNode* node, int severity) {
-    PQitem item = { severity, node };
-    minHeap.push_back(item);
-    heapifyUp(minHeap.size() - 1);
-}
-
-IncidentNode* IncidentManager::extractMinPQ() {
-    if (minHeap.empty()) return nullptr;
-    IncidentNode* node = minHeap[0].incident;
-    minHeap[0] = minHeap.back();
-    minHeap.pop_back();
-    heapifyDown(0);
-    return node;
-}
-
-void IncidentManager::heapifyUp(int index) {
-    while (index > 0) {
-        int parent = (index - 1) / 2;
-        if (minHeap[index].severity < minHeap[parent].severity) {
-            swap(minHeap[index], minHeap[parent]);
-            index = parent;
+    for (auto nbr : adj[v]) {
+        if (!visited[nbr.first]) {
+            DFSUtil(nbr.first, visited);
         }
-        else break;
     }
 }
 
-void IncidentManager::heapifyDown(int index) {
-    int left, right, smallest;
-    int size = minHeap.size();
+// ---------------- Dijkstra ----------------
+void Graph::dijkstra(int source) {
+    vector<int> dist(V, INT_MAX);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
 
-    while (true) {
-        left = 2 * index + 1;
-        right = 2 * index + 2;
-        smallest = index;
+    dist[source] = 0;
+    pq.push({ 0, source });
 
-        if (left < size && minHeap[left].severity < minHeap[smallest].severity)
-            smallest = left;
-        if (right < size && minHeap[right].severity < minHeap[smallest].severity)
-            smallest = right;
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
 
-        if (smallest != index) {
-            swap(minHeap[index], minHeap[smallest]);
-            index = smallest;
+        for (auto nbr : adj[u]) {
+            int v = nbr.first;
+            int w = nbr.second;
+
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({ dist[v], v });
+            }
         }
-        else break;
+    }
+
+    cout << "Shortest Rescue Routes from Location " << source << ":\n";
+    for (int i = 0; i < V; i++) {
+        cout << "To Location " << i << " = " << dist[i] << endl;
     }
 }
-
-// ----------- BST Operations -----------
-
-BSTNode* IncidentManager::insertBST(BSTNode* root, IncidentNode* node) {
-    if (root == nullptr) return new BSTNode(node->type);
-
-    if (node->type < root->type)
-        root->left = insertBST(root->left, node);
-    else if (node->type > root->type)
-        root->right = insertBST(root->right, node);
-    else
-        root->incidents.push_back(node);
-
-    return root;
-}
-
-vector<IncidentNode*> IncidentManager::searchBST(string type) {
-    vector<IncidentNode*> result;
-    BSTNode* temp = root;
-
-    while (temp != nullptr) {
-        if (type == temp->type) return temp->incidents;
-        else if (type < temp->type) temp = temp->left;
-        else temp = temp->right;
-    }
-    return result;
-}
-
-void IncidentManager::inorderBST(BSTNode* root) {
-    if (root == nullptr) return;
-    inorderBST(root->left);
-    cout << "Type: " << root->type << " (Incidents: " << root->incidents.size() << ")\n";
-    inorderBST(root->right);
-}
-
-int IncidentManager::totalIncidents() {
-    int count = 0;
-    IncidentNode* temp = head;
-    while (temp != nullptr) {
-        count++;
-        temp = temp->next;
-    }
-    return count;
-}
-// ===== ADD ONLY =====
-void IncidentManager::loadFromCSV(string filename) {
-    ifstream file(filename);
-    string line;
-
-    getline(file, line); // header skip
-
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string id, t, l, d, s;
-
-        getline(ss, id, ',');
-        getline(ss, t, ',');
-        getline(ss, l, ',');
-        getline(ss, d, ',');
-        getline(ss, s, ',');
-
-        addIncident(t, l, d, stoi(s));
-    }
-    file.close();
-}
-
 
